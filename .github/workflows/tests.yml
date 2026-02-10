@@ -21,15 +21,20 @@ jobs:
           pip install -r requirements.txt
 
       - name: Create artifacts directory
-        run: mkdir -p artifacts
+        run: |
+          pwd
+          ls -la
+          mkdir -p artifacts
+          echo "placeholder" > artifacts/.keep
+          ls -la artifacts
 
       - name: Run pytest
         env:
           CI: "true"
         run: pytest -q
 
-      - name: Upload artifacts on failure
-        if: failure()
+      - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
