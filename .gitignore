@@ -22,3 +22,5 @@ data/resume.pdf
 *.swp
 *~
 
+artifacts/
+
