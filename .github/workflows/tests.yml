@@ -20,6 +20,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
       - name: Run pytest
         env:
           CI: "true"
