@@ -62,31 +62,51 @@ class JobApplicationPage:
         # Platform options on the site: Google Search / Online Advertisement / Friend Recommendation / Other
         Select(self.driver.find_element(By.NAME, "platform")).select_by_visible_text(platform)
 
-    def submit(self):        return True
-
+    def submit(self):
         btn = self.wait.until(EC.presence_of_element_located((By.ID, "add")))
         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
 
+        clicked = False
+
+        # Attempt 1: normal click
         try:
             self.wait.until(EC.element_to_be_clickable((By.ID, "add"))).click()
-            return
+            clicked = True
         except Exception:
             pass
 
+        # Attempt 2: action chains click
+        if not clicked:
+            try:
+                ActionChains(self.driver).move_to_element(btn).click(btn).perform()
+                clicked = True
+            except Exception:
+                pass
+
+        # Attempt 3: JS click
+        if not clicked:
+            try:
+                self.driver.execute_script("arguments[0].click();", btn)
+                clicked = True
+            except Exception:
+                pass
+
+        # Always handle success alert if it appears
         try:
-            ActionChains(self.driver).move_to_element(btn).click(btn).perform()
-            return
+            alert = self.driver.switch_to.alert
+            _ = alert.text
+            alert.accept()
         except Exception:
             pass
 
-        self.driver.execute_script("arguments[0].click();", btn)
+        return clicked
 
-    # ✅ THIS is the missing method your test is calling
+
+
     def upload_resume(self, file_path: str):
         """
         Upload resume by sending absolute file path to the <input type='file'> element.
         """
-
         from pathlib import Path
 
         p = Path(file_path).expanduser()
@@ -96,17 +116,17 @@ class JobApplicationPage:
         if not p.exists():
             raise FileNotFoundError(f"Resume file not found: {p}")
 
-        # Prefer the known id if it exists on your site
+        # Prefer the known id if it exists
         try:
             el = self.wait.until(EC.presence_of_element_located((By.ID, "resume")))
         except Exception:
+            # Fallback selectors
             candidates = [
                 (By.CSS_SELECTOR, "input[type='file']"),
                 (By.CSS_SELECTOR, "input[type='file'][name*='resume' i]"),
                 (By.CSS_SELECTOR, "input[type='file'][id*='resume' i]"),
                 (By.CSS_SELECTOR, "input[type='file'][accept*='pdf' i]"),
             ]
-
             el = None
             for loc in candidates:
                 try:
@@ -117,13 +137,15 @@ class JobApplicationPage:
                     continue
 
             if not el:
-                raise RuntimeError("Could not find a file upload input (<input type='file'>) on the page.")
+                raise RuntimeError("Could not find a file upload input (<input type='file'>).")
 
+        # Scroll into view
         try:
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", el)
         except Exception:
             pass
 
+        # If hidden, try to make visible
         try:
             self.driver.execute_script(
                 "arguments[0].style.display='block'; arguments[0].style.visibility='visible';",
@@ -134,4 +156,43 @@ class JobApplicationPage:
 
         el.send_keys(str(p))
         return str(p)
+
+def submit(self):
+    btn = self.wait.until(EC.presence_of_element_located((By.ID, "add")))
+    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
+
+    clicked = False
+
+    # Attempt 1: normal click
+    try:
+        self.wait.until(EC.element_to_be_clickable((By.ID, "add"))).click()
+        clicked = True
+    except Exception:
+        pass
+
+    # Attempt 2: action chains click
+    if not clicked:
+        try:
+            ActionChains(self.driver).move_to_element(btn).click(btn).perform()
+            clicked = True
+        except Exception:
+            pass
+
+    # Attempt 3: JS click
+    if not clicked:
+        try:
+            self.driver.execute_script("arguments[0].click();", btn)
+            clicked = True
+        except Exception:
+            pass
+
+    # Always handle success alert if it appears
+    try:
+        alert = self.driver.switch_to.alert
+        _ = alert.text
+        alert.accept()
+    except Exception:
+        pass
+
+    return clicked
 

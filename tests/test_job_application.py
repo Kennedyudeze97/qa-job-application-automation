@@ -22,7 +22,6 @@ def test_submit_job_application(driver, applicant):
     page.set_employment_status(applicant["employment_status"])
     page.select_platform(applicant["platform"])
     page.upload_resume(applicant["resume_path"])
-    page.submit()
 
     assert page.submit() is True
 
