@@ -17,3 +17,8 @@ report.html
 
 # Private resume file (do not commit)
 data/resume.pdf
+
+*.save
+*.swp
+*~
+
