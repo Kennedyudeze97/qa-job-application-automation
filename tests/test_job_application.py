@@ -24,6 +24,8 @@ def test_submit_job_application(driver, applicant, resume_file):
 
     page.upload_resume(resume_file)
 
+
+    page.upload_resume(resume_file)
     page.submit()
-    assert page.is_success()
+    assert False
 
