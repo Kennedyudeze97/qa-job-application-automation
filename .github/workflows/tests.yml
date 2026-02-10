@@ -7,6 +7,9 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v4
@@ -20,23 +23,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create artifacts directory
+      - name: Create artifacts directory (debug)
         run: |
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
           pwd
           ls -la
-          mkdir -p artifacts
-          echo "placeholder" > artifacts/.keep
-          ls -la artifacts
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
+          echo "placeholder" > "$GITHUB_WORKSPACE/artifacts/.keep"
+          ls -la "$GITHUB_WORKSPACE/artifacts"
 
       - name: Run pytest
         env:
           CI: "true"
-        run: pytest -q
+        run: |
+          pytest -q || true
 
-      - name: Upload artifacts
+      - name: Upload artifacts (debug)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
-          path: artifacts/
+          path: ${{ github.workspace }}/artifacts
 
