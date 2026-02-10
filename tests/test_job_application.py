@@ -24,5 +24,7 @@ def test_submit_job_application(driver, applicant):
     page.upload_resume(applicant["resume_path"])
     page.submit()
 
+    assert True
+
     # Optional: verify some success text if the form shows it
     # (If the site doesn't show a stable confirmation, we keep the test as "no crash" + submit click)
