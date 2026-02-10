@@ -1,0 +1,19 @@
+# Virtual env
+.venv/
+
+# Python cache
+__pycache__/
+*/__pycache__/
+*.pyc
+
+# Pytest cache
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# Reports / artifacts
+report.html
+
+# Private resume file (do not commit)
+data/resume.pdf

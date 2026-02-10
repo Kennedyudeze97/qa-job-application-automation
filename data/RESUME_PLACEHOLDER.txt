@@ -1,0 +1,4 @@
+Place your resume PDF here (kept private, ignored by git):
+- data/resume.pdf
+
+The automation uploads this file via the resume input on the form.

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "John Tester",
+    "email": "john@test.com",
+    "phone": "1234567890",
+    "position": "Quality Analyst",
+    "employment_status": "employed",
+    "platform": "Google Search",
+    "resume_path": "data/resume.pdf"
+  },
+  {
+    "name": "Jane QA",
+    "email": "janeqa@test.com",
+    "phone": "2223334444",
+    "position": "Quality Analyst",
+    "employment_status": "student",
+    "platform": "Other",
+    "resume_path": "data/resume.pdf"
+  }
+]
