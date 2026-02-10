@@ -11,7 +11,7 @@ def load_applicants():
 
 
 @pytest.mark.parametrize("applicant", load_applicants())
-def test_submit_job_application(driver, applicant):
+def test_submit_job_application(driver, applicant, resume_file):
     page = JobApplicationPage(driver)
     page.load()
 
@@ -21,9 +21,9 @@ def test_submit_job_application(driver, applicant):
     page.select_position(applicant["position"])
     page.set_employment_status(applicant["employment_status"])
     page.select_platform(applicant["platform"])
-    page.upload_resume(applicant["resume_path"])
 
-    assert page.submit() is True
+    page.upload_resume(resume_file)
 
-    # Optional: verify some success text if the form shows it
-    # (If the site doesn't show a stable confirmation, we keep the test as "no crash" + submit click)
+    page.submit()
+    assert page.is_success()
+

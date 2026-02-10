@@ -157,42 +157,50 @@ class JobApplicationPage:
         el.send_keys(str(p))
         return str(p)
 
-def submit(self):
-    btn = self.wait.until(EC.presence_of_element_located((By.ID, "add")))
-    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
+    def submit(self):
+        """
+        Click the submit button using multiple strategies for reliability,
+        then wait for the success alert.
+        """
+        btn = self.wait.until(EC.presence_of_element_located((By.ID, "add")))
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", btn
+        )
 
-    clicked = False
+        clicked = False
 
-    # Attempt 1: normal click
-    try:
-        self.wait.until(EC.element_to_be_clickable((By.ID, "add"))).click()
-        clicked = True
-    except Exception:
-        pass
-
-    # Attempt 2: action chains click
-    if not clicked:
+        # Attempt 1: normal click
         try:
-            ActionChains(self.driver).move_to_element(btn).click(btn).perform()
+            self.wait.until(EC.element_to_be_clickable((By.ID, "add"))).click()
             clicked = True
         except Exception:
             pass
 
-    # Attempt 3: JS click
-    if not clicked:
-        try:
+        # Attempt 2: action chains click
+        if not clicked:
+            try:
+                ActionChains(self.driver).move_to_element(btn).click(btn).perform()
+                clicked = True
+            except Exception:
+                pass
+
+        # Attempt 3: JS click
+        if not clicked:
             self.driver.execute_script("arguments[0].click();", btn)
-            clicked = True
+
+        # Wait for the browser alert after submission
+        self.wait.until(EC.alert_is_present())
+
+
+    def is_success(self, timeout: int = 5) -> bool:
+        """
+        Return True if the submit success alert appears and contains expected text.
+        """
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.alert_is_present())
+            alert = self.driver.switch_to.alert
+            text = (alert.text or "").lower()
+            return ("success" in text) or ("submitted" in text)
         except Exception:
-            pass
-
-    # Always handle success alert if it appears
-    try:
-        alert = self.driver.switch_to.alert
-        _ = alert.text
-        alert.accept()
-    except Exception:
-        pass
-
-    return clicked
+            return False
 
