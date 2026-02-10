@@ -1,0 +1,9 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/kennedyudeze/Desktop/qa-job-app-automation
+plugins: metadata-3.1.1, html-4.2.0
+collected 2 items
+
+tests/test_job_application.py ..                                         [100%]
+
+============================== 2 passed in 12.53s ==============================
