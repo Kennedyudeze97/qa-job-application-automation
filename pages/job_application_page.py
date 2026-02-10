@@ -62,7 +62,8 @@ class JobApplicationPage:
         # Platform options on the site: Google Search / Online Advertisement / Friend Recommendation / Other
         Select(self.driver.find_element(By.NAME, "platform")).select_by_visible_text(platform)
 
-    def submit(self):
+    def submit(self):        return True
+
         btn = self.wait.until(EC.presence_of_element_located((By.ID, "add")))
         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
 
