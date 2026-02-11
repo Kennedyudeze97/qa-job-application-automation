@@ -11,6 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare artifacts folder
+        run: |
+          mkdir -p artifacts
+          echo "placeholder" > artifacts/.keep
+          ls -la artifacts
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -19,11 +25,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Create artifacts directory
-        run: |
-          mkdir -p artifacts
-          echo "placeholder" > artifacts/.keep
 
       - name: Run pytest
         env:
@@ -35,6 +36,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
-          path: |
-            artifacts/**
+          path: artifacts
 
