@@ -31,10 +31,20 @@ jobs:
           CI: "true"
         run: pytest -q
 
-      - name: Upload artifacts on failure
-        if: failure()
+      - name: Debug workspace + artifacts
+        if: always()
+        run: |
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          pwd
+          ls -la
+          echo "Artifacts listing:"
+          ls -la artifacts || true
+
+      - name: Upload artifacts (debug)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-artifacts
           path: artifacts
+          if-no-files-found: warn
 
