@@ -29,6 +29,64 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
 
+    # Only after the test body runs, and only on failures
+    if rep.when != "call" or rep.passed:
+        return
+
+    driver = item.funcargs.get("driver")
+    if not driver:
+        return
+
+    import pathlib
+    from datetime import datetime
+    from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
+
+    artifacts_dir = pathlib.Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    name = f"{item.name}_{timestamp}"
+
+    screenshot_path = artifacts_dir / f"{name}.png"
+    html_path = artifacts_dir / f"{name}.html"
+    alert_path = artifacts_dir / f"{name}.alert.txt"
+
+    # If an alert is open, record it and try to close it so screenshot works
+    try:
+        alert = driver.switch_to.alert
+        alert_path.write_text((alert.text or ""), encoding="utf-8")
+        try:
+            alert.accept()
+        except Exception:
+            pass
+    except NoAlertPresentException:
+        pass
+    except Exception:
+        pass
+
+    # Screenshot (guard against alerts blocking webdriver commands)
+    try:
+        driver.save_screenshot(str(screenshot_path))
+    except UnexpectedAlertPresentException:
+        try:
+            alert = driver.switch_to.alert
+            alert_path.write_text((alert.text or ""), encoding="utf-8")
+            alert.accept()
+            driver.save_screenshot(str(screenshot_path))
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    # HTML dump
+    try:
+        html_path.write_text(driver.page_source, encoding="utf-8")
+    except Exception:
+        pass
+
+    outcome = yield
+    rep = outcome.get_result()
+
     if rep.when != "call" or rep.passed:
         return
 
@@ -48,6 +106,7 @@ def pytest_runtest_makereport(item, call):
 import pathlib
 from datetime import datetime
 import pytest
+from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -55,12 +114,7 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
 
-    # Only act after the test body runs
-    if rep.when != "call":
-        return
-
-    # Only capture artifacts on failure
-    if rep.passed:
+    if rep.when != "call" or rep.passed:
         return
 
     driver = item.funcargs.get("driver")
@@ -71,13 +125,45 @@ def pytest_runtest_makereport(item, call):
     artifacts_dir.mkdir(exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    test_name = item.name
+    name = f"{item.name}_{timestamp}"
 
-    screenshot_path = artifacts_dir / f"{test_name}_{timestamp}.png"
-    html_path = artifacts_dir / f"{test_name}_{timestamp}.html"
+    screenshot_path = artifacts_dir / f"{name}.png"
+    html_path = artifacts_dir / f"{name}.html"
+    alert_path = artifacts_dir / f"{name}.alert.txt"
 
-    driver.save_screenshot(str(screenshot_path))
+    # If an alert is open, record it and try to close it so screenshot works
+    try:
+        alert = driver.switch_to.alert
+        text = alert.text or ""
+        alert_path.write_text(text, encoding="utf-8")
+        try:
+            alert.accept()
+        except Exception:
+            pass
+    except NoAlertPresentException:
+        pass
+    except Exception:
+        # don't let artifact collection crash pytest
+        pass
 
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(driver.page_source)
+    # Screenshot (guard against alerts blocking webdriver commands)
+    try:
+        driver.save_screenshot(str(screenshot_path))
+    except UnexpectedAlertPresentException:
+        # Try once more after accepting the alert
+        try:
+            alert = driver.switch_to.alert
+            alert_path.write_text((alert.text or ""), encoding="utf-8")
+            alert.accept()
+            driver.save_screenshot(str(screenshot_path))
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    # HTML dump
+    try:
+        html_path.write_text(driver.page_source, encoding="utf-8")
+    except Exception:
+        pass
 

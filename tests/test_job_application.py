@@ -22,10 +22,8 @@ def test_submit_job_application(driver, applicant, resume_file):
     page.set_employment_status(applicant["employment_status"])
     page.select_platform(applicant["platform"])
 
-    page.upload_resume(resume_file)
-
 
     page.upload_resume(resume_file)
     page.submit()
-    assert False
+    assert page.is_success()
 
