@@ -51,12 +51,10 @@ class JobApplicationPage:
 
         self.driver.execute_script("arguments[0].click();", el)
 
-    # ✅ THIS is the missing method your test is calling
 
 
 
 
-    # If hidden, make visible (many sites hide the input behind a button)
 
     def select_platform(self, platform: str):
         # Platform options on the site: Google Search / Online Advertisement / Friend Recommendation / Other
